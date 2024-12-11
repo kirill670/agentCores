@@ -1,6 +1,23 @@
 # agentCore
 This project provides a class with methods to create agentCore databases.
 
+# installation
+Clone the agentCore repo:
+```cmd
+git clone https://github.com/Leoleojames1/agentCore
+```
+
+Install the required python packages (file not existant):
+```
+pip install -r requirements.txt
+```
+
+To Run and access the agent_matrix.db use:
+```
+python agentCore.py
+```
+
+Start by using the /help command:
 ```cmd
 Enter commands to manage agent cores. Type '/help' for options.
 > /help
@@ -9,63 +26,31 @@ Commands:
   /showAgent <agent_id> - Show agents with the specified ID.
   /createAgent <template_id> <new_agent_id> - Mint a new agent.
   /storeAgent <file_path> - Store agentCore from json path.
-agentCore system initialized. Enter '/help' for a list of commands.
-
-Enter commands to manage agent cores. Type '/help' for options.
-> /help
-Commands:
-  /agentCores - List all agent cores.
-  /showAgent <agent_id> - Show agents with the specified ID.
-  /createAgent <template_id> <new_agent_id> - Mint a new agent.
-  /storeAgent <file_path> - Store agentCore from json path.
+  /deleteAgent <uid> - Delete an agent by UID.
   /exportAgent <agent_id> - Export agentCore to json.
   /deleteAgent <uid> - Delete an agent by UID.
-> /help
-Commands:
-  /agentCores - List all agent cores.
-  /showAgent <agent_id> - Show agents with the specified ID.
-  /createAgent <template_id> <new_agent_id> - Mint a new agent.
-  /storeAgent <file_path> - Store agentCore from json path.
-  /exportAgent <agent_id> - Export agentCore to json.
-  /deleteAgent <uid> - Delete an agent by UID.
-  /createAgent <template_id> <new_agent_id> - Mint a new agent.
-  /storeAgent <file_path> - Store agentCore from json path.
-  /exportAgent <agent_id> - Export agentCore to json.
-  /deleteAgent <uid> - Delete an agent by UID.
-  /resetAgent <uid> - Reset an agent to the base template.
-  /exportAgent <agent_id> - Export agentCore to json.
-  /deleteAgent <uid> - Delete an agent by UID.
-  /resetAgent <uid> - Reset an agent to the base template.
   /resetAgent <uid> - Reset an agent to the base template.
   /exit - Exit the interface.
+```
+
+Now to get the agentCores type:
+```
 > /agentCores
+
 ID: default_agent, UID: ff22a0c1, Version: 1
 ID: promptBase, UID: 6f18aba0, Version: 1
-ID: ehartfordDolphin, UID: 18556c0c, Version: 1
-ID: speedChatAgent, UID: f1a7092c, Version: 1
-ID: default_agent, UID: ff22a0c1, Version: 1
-ID: promptBase, UID: 6f18aba0, Version: 1
-ID: ehartfordDolphin, UID: 18556c0c, Version: 1
 ID: speedChatAgent, UID: f1a7092c, Version: 1
 ID: ehartfordDolphin, UID: 18556c0c, Version: 1
-ID: speedChatAgent, UID: f1a7092c, Version: 1
-ID: speedChatAgent, UID: f1a7092c, Version: 1
 ID: minecraft_agent, UID: 25389031, Version: 1
 ID: general_navigator_agent, UID: d1f12a46, Version: 1
-> /help      
-Commands:
-  /agentCores - List all agent cores.
-  /showAgent <agent_id> - Show agents with the specified ID.
-  /createAgent <template_id> <new_agent_id> - Mint a new agent.
-  /storeAgent <file_path> - Store agentCore from json path.
-  /exportAgent <agent_id> - Export agentCore to json.
-  /deleteAgent <uid> - Delete an agent by UID.
-  /resetAgent <uid> - Reset an agent to the base template.
-  /exit - Exit the interface.
+```
+
+Now to see an agent core use the following command
+```cmd
 > /showAgent general_navigator_agent
 ```
-The agentCore will now be displayed.
 
+The agentCore will now be displayed:
 ```json
 {
     "agentCore": {
@@ -109,6 +94,10 @@ The agentCore will now be displayed.
         }
     }
 }
+```
+
+Now to export an agentCore to json execute the following:
+```cmd
 > /exportAgent general_navigator_agent
 Agent core saved to general_navigator_agent_core.json
 >
