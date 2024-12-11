@@ -1,6 +1,6 @@
 # agentCore
 <p align="center">
-  <img src="agentCore1.png" alt="agentCore logo" width="750"/>
+  <img src="agentCore1.png" alt="agentCore logo" width="350"/>
 </p>
 
 This project provides files with methods to handle agentCores for agent_matrix.db
