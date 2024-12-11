@@ -1,2 +1,115 @@
 # agentCore
 This project provides a class with methods to create agentCore databases.
+
+```cmd
+Enter commands to manage agent cores. Type '/help' for options.
+> /help
+Commands:
+  /agentCores - List all agent cores.
+  /showAgent <agent_id> - Show agents with the specified ID.
+  /createAgent <template_id> <new_agent_id> - Mint a new agent.
+  /storeAgent <file_path> - Store agentCore from json path.
+agentCore system initialized. Enter '/help' for a list of commands.
+
+Enter commands to manage agent cores. Type '/help' for options.
+> /help
+Commands:
+  /agentCores - List all agent cores.
+  /showAgent <agent_id> - Show agents with the specified ID.
+  /createAgent <template_id> <new_agent_id> - Mint a new agent.
+  /storeAgent <file_path> - Store agentCore from json path.
+  /exportAgent <agent_id> - Export agentCore to json.
+  /deleteAgent <uid> - Delete an agent by UID.
+> /help
+Commands:
+  /agentCores - List all agent cores.
+  /showAgent <agent_id> - Show agents with the specified ID.
+  /createAgent <template_id> <new_agent_id> - Mint a new agent.
+  /storeAgent <file_path> - Store agentCore from json path.
+  /exportAgent <agent_id> - Export agentCore to json.
+  /deleteAgent <uid> - Delete an agent by UID.
+  /createAgent <template_id> <new_agent_id> - Mint a new agent.
+  /storeAgent <file_path> - Store agentCore from json path.
+  /exportAgent <agent_id> - Export agentCore to json.
+  /deleteAgent <uid> - Delete an agent by UID.
+  /resetAgent <uid> - Reset an agent to the base template.
+  /exportAgent <agent_id> - Export agentCore to json.
+  /deleteAgent <uid> - Delete an agent by UID.
+  /resetAgent <uid> - Reset an agent to the base template.
+  /resetAgent <uid> - Reset an agent to the base template.
+  /exit - Exit the interface.
+> /agentCores
+ID: default_agent, UID: ff22a0c1, Version: 1
+ID: promptBase, UID: 6f18aba0, Version: 1
+ID: ehartfordDolphin, UID: 18556c0c, Version: 1
+ID: speedChatAgent, UID: f1a7092c, Version: 1
+ID: default_agent, UID: ff22a0c1, Version: 1
+ID: promptBase, UID: 6f18aba0, Version: 1
+ID: ehartfordDolphin, UID: 18556c0c, Version: 1
+ID: speedChatAgent, UID: f1a7092c, Version: 1
+ID: ehartfordDolphin, UID: 18556c0c, Version: 1
+ID: speedChatAgent, UID: f1a7092c, Version: 1
+ID: speedChatAgent, UID: f1a7092c, Version: 1
+ID: minecraft_agent, UID: 25389031, Version: 1
+ID: general_navigator_agent, UID: d1f12a46, Version: 1
+> /help      
+Commands:
+  /agentCores - List all agent cores.
+  /showAgent <agent_id> - Show agents with the specified ID.
+  /createAgent <template_id> <new_agent_id> - Mint a new agent.
+  /storeAgent <file_path> - Store agentCore from json path.
+  /exportAgent <agent_id> - Export agentCore to json.
+  /deleteAgent <uid> - Delete an agent by UID.
+  /resetAgent <uid> - Reset an agent to the base template.
+  /exit - Exit the interface.
+> /showAgent general_navigator_agent
+```
+The agentCore will now be displayed.
+
+```json
+{
+    "agentCore": {
+        "agent_id": "general_navigator_agent",
+        "version": 1,
+        "uid": "d1f12a46",
+        "save_state_date": "2024-12-11",
+        "models": {
+            "large_language_model": null,
+            "embedding_model": null,
+            "language_and_vision_model": null,
+            "yolo_model": null,
+            "whisper_model": null,
+            "voice_model": null
+        },
+        "prompts": {
+            "user_input_prompt": "",
+            "agentPrompts": {
+                "llmSystemPrompt": "You are a helpful llm assistant, designated with with fulling the user's request, the user is communicating with speech recognition and is sending their screenshot data to the                   vision model for decomposition. Receive this destription and Instruct the user and help them fullfill their request by collecting the vision data and responding. ",
+                "llmBoosterPrompt": "Here is the output from the vision model describing the user screenshot data along with the users speech data. Please reformat this data, and formulate a fullfillment for the                   user request in a conversational speech manner which will be processes by the text to speech model for output. ",
+                "visionSystemPrompt": "You are an image recognition assistant, the user is sending you a request and an image please fullfill the request. ",
+                "visionBoosterPrompt": "Given the provided screenshot, please provide a list of objects in the image with the attributes that you can recognize. "
+            }
+        },
+        "commandFlags": {
+            "TTS_FLAG": false,
+            "STT_FLAG": true,
+            "CHUNK_FLAG": false,
+            "AUTO_SPEECH_FLAG": false,
+            "LLAVA_FLAG": true,
+            "SPLICE_FLAG": false,
+            "SCREEN_SHOT_FLAG": false,
+            "LATEX_FLAG": false,
+            "CMD_RUN_FLAG": false,
+            "AGENT_FLAG": true,
+            "MEMORY_CLEAR_FLAG": false
+        },
+        "conversation": {
+            "save_name": "defaultConversation",
+            "load_name": "defaultConversation"
+        }
+    }
+}
+> /exportAgent general_navigator_agent
+Agent core saved to general_navigator_agent_core.json
+>
+```
