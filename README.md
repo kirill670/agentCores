@@ -1,6 +1,24 @@
 # agentCore
-This project provides a class with methods to create agentCore databases.
+This file provides a class with methods to handle agentCores for agent_matrix.db
 
+agentCore System:
+1. Successfully initializes and stores your predefined agents in SQLite
+2. Lists all available agent cores
+3. Can mint new instances from any template
+4. Properly handles loading and saving configurations
+
+This gives you a solid foundation to:
+1. Move the agent templates to separate JSON files later
+2. Add more agent types easily
+3. Track instances and templates in the database
+4. Eventually add embedding functionality
+
+The test shows everything working as intended:
+- All predefined agents are loaded and stored
+- Can create new instances with overrides (like the Minecraft agent with llama2)
+- Loading and verification works
+- Cleanup works
+    
 # installation
 Clone the agentCore repo:
 ```cmd
