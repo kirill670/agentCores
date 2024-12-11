@@ -22,6 +22,8 @@ The test shows everything working as intended:
 - Can create new instances with overrides (like the Minecraft agent with llama2)
 - Loading and verification works
 - Cleanup works
+
+#TODO add pydantic agentCores
     
 # installation
 Clone the agentCore repo:
