@@ -1,5 +1,5 @@
 # agentCore
-This file provides a class with methods to handle agentCores for agent_matrix.db
+This project provides files with methods to handle agentCores for agent_matrix.db
 
 agentCore System:
 1. Successfully initializes and stores your predefined agents in SQLite
