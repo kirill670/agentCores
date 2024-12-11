@@ -1,6 +1,10 @@
 # agentCore
 This project provides files with methods to handle agentCores for agent_matrix.db
 
+<p align="center">
+  <img src="agentCore1.png" alt="OARC LOGO" width="750"/>
+</p>
+
 agentCore System:
 1. Successfully initializes and stores your predefined agents in SQLite
 2. Lists all available agent cores
