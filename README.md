@@ -100,5 +100,4 @@ Now to export an agentCore to json execute the following:
 ```cmd
 > /exportAgent general_navigator_agent
 Agent core saved to general_navigator_agent_core.json
->
 ```
