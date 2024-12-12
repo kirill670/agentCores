@@ -3,8 +3,8 @@
   <img src="https://raw.githubusercontent.com/Leoleojames1/agentCores/main/src/agentCores/data/agentCoresLogoFix.png" alt="agentCores logo" width="450"/>
 </p>
 
-# agentCores: Advanced AI Agent Management System
-agentCoresLogoFix.png
+## agentCores: Advanced AI Agent Management System
+
 agentCores is a powerful and flexible Python package designed to streamline the creation, management, and deployment of AI agents. It provides a robust framework for handling complex agent configurations, making it easier for developers and researchers to work with multiple AI models and agent types.
 
 ## What agentCores Does
@@ -430,6 +430,8 @@ core.commandInterface()
 > /linkDatabase advanced_research_agent citations citations.db
 ```
 
+# Usage Examples
+
 ## Basic Ollama Usage Example
 
 ```python
@@ -491,7 +493,7 @@ def chat_with_agent(agent_config, prompt):
 chat_with_agent(agent, "Explain how neural networks work")
 ```
 
-# Advanced Ollama Chatbot Usage Example
+## Advanced Ollama Chatbot Usage Example
 We can now construct advanced local assistants with ollama agentCores, and embedded db filenames, for nested knowledgeBase architectures.
 
 ```python
@@ -571,7 +573,9 @@ Key changes made:
 5. Added `CODE_MODE` flag
 6. Updated prompts for programming focus
 
-# agentCores Database Configuration Guide
+# Customization
+
+## agentCores Database Configuration Guide
 
 agentCores provides flexible options for database configuration and customization. This guide covers all the ways you can customize your database setup.
 
