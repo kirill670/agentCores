@@ -1,5 +1,5 @@
 # agentCores
-![agentCores Logo](https://raw.githubusercontent.com/Leoleojames1/agentCores/agentCoresLogoFix.png)
+![agentCores Logo](https://github.com/Leoleojames1/agentCores/agentCoresLogoFix.png)
 
 # agentCores: Advanced AI Agent Management System
 
