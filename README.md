@@ -1,13 +1,13 @@
-# agentCore
+# agentCores
 <p align="center">
-  <img src="agentCore1.png" alt="agentCore logo" width="450"/>
+  <img src="agentCoreLogo.svg" alt="agentCore logo" width="450"/>
 </p>
 
-# agentCore: Advanced AI Agent Management System
+# agentCores: Advanced AI Agent Management System
 
-agentCore is a powerful and flexible Python package designed to streamline the creation, management, and deployment of AI agents. It provides a robust framework for handling complex agent configurations, making it easier for developers and researchers to work with multiple AI models and agent types.
+agentCores is a powerful and flexible Python package designed to streamline the creation, management, and deployment of AI agents. It provides a robust framework for handling complex agent configurations, making it easier for developers and researchers to work with multiple AI models and agent types.
 
-## What agentCore Does
+## What agentCores Does
 
 1. **Agent Configuration Management**: 
    - Create, store, and manage AI agent configurations in a structured SQLite database.
@@ -62,7 +62,7 @@ agentCore is a powerful and flexible Python package designed to streamline the c
 4. **Multi-Agent Orchestration**: Tools for managing interactions between multiple agents.
 5. **pydantic & ollama agentCores**: Future agentCores built around ollama & pydantic agents. Unleashing flexible local agent dbs for advanced code splicing, and agent state monitoring.
 
-agentCore provides a solid foundation for building sophisticated AI agent systems, offering the flexibility and scalability needed for both research and production environments. Whether you're working on a simple chatbot or a complex multi-agent system, agentCore simplifies the process of creating, managing, and deploying AI agents.
+agentCores provides a solid foundation for building sophisticated AI agent systems, offering the flexibility and scalability needed for both research and production environments. Whether you're working on a simple chatbot or a complex multi-agent system, agentCores simplifies the process of creating, managing, and deploying AI agents.
     
 # installation
 ```bash
@@ -75,14 +75,14 @@ pip install agentCore
 ```python
 agentCores.__init__(db_path: str = "agent_matrix.db", db_config: Optional[Dict] = None, template: Optional[Dict] = None)
 """
-Initialize the agentCore system with optional custom configuration.
+Initialize the agentCores system with optional custom configuration.
 
     db_path: Path to the main agent matrix database.
     db_config: Custom database configuration.
     template: Custom agent template.
 
-This method sets up the agentCore system, initializing the database and loading any custom configurations. 
-It's the first method you should call when using the agentCore package.
+This method sets up the agentCores system, initializing the database and loading any custom configurations. 
+It's the first method you should call when using the agentCores package.
 """
 ```
 
@@ -361,7 +361,7 @@ ID: minecraft_agent, UID: 25389031, Version: 1
 ID: general_navigator_agent, UID: d1f12a46, Version: 1
 ```
 
-Now to see an agent core use the following command
+Now to see an agentCore use the following command
 ```cmd
 > /showAgent general_navigator_agent
 ```
@@ -415,7 +415,7 @@ The agentCore will now be displayed:
 Now to export an agentCore to json execute the following:
 ```cmd
 > /exportAgent general_navigator_agent
-Agent core saved to general_navigator_agent_core.json
+agentCore saved to general_navigator_agent_core.json
 ```
 
 ### Additional Database Management
@@ -431,11 +431,11 @@ Agent core saved to general_navigator_agent_core.json
 ## Basic Ollama Usage Example
 
 ```python
-from agentCore import agentCore
+from agentCores import agentCores
 from ollama import chat
 
 # Initialize agentCore
-core = agentCore()
+cores = agentCores()
 
 # Create basic Ollama agent configuration
 basic_config = {
@@ -493,11 +493,11 @@ chat_with_agent(agent, "Explain how neural networks work")
 We can now construct advanced local assistants with ollama agentCores, and embedded db filenames, for nested knowledgeBase architectures.
 
 ```python
-from agentCore import agentCore
+from agentCores import agentCores
 from ollama import chat
 
 # Initialize agentCore
-core = agentCore()
+cores = agentCores()
 
 # Create a coding assistant configuration
 coding_config = {
@@ -569,19 +569,19 @@ Key changes made:
 5. Added `CODE_MODE` flag
 6. Updated prompts for programming focus
 
-# AgentCore Database Configuration Guide
+# agentCores Database Configuration Guide
 
-AgentCore provides flexible options for database configuration and customization. This guide covers all the ways you can customize your database setup.
+agentCores provides flexible options for database configuration and customization. This guide covers all the ways you can customize your database setup.
 
 ## Basic Database Configuration
 
 ### Using base_path
 Set a custom location for all databases:
 ```python
-from agentCore import agentCore
+from agentCores import agentCores
 
 # Put all databases in a custom location
-core = agentCore(base_path="my/custom/path")
+core = agentCores(base_path="my/custom/path")
 ```
 
 ### Using Custom Database Paths
@@ -618,15 +618,15 @@ agent = core.mintAgent(
 Modify the base template:
 ```python
 # Get base template first
-core = agentCore()
-base = core.getNewAgentCore()
+cores = agentCores()
+base = cores.getNewAgentCore()
 
 # Modify the base template
 base["agentCore"]["models"]["large_language_model"] = "my-custom-model"
 base["agentCore"]["prompts"]["user_input_prompt"] = "My custom prompt"
 
 # Create new core with modified template
-custom_core = agentCore(template=base)
+custom_cores = agentCores(template=base)
 ```
 
 ### Custom Template
