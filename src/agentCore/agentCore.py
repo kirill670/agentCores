@@ -76,7 +76,7 @@ import hashlib
 import copy
 from pathlib import Path
 from typing import Optional, Dict, Any
-from src.agentCore.agentMatrix import agentMatrix
+from agentMatrix import agentMatrix
 
 # add uithub scrape, add arxiv
 
@@ -110,9 +110,6 @@ class agentCore:
         
         # Initialize template with any custom configuration
         self.initTemplate(template)
-        
-        # Load default agents if this is a fresh database
-        self._ensure_default_agents()
         
         # Update database configuration if provided
         if db_config:
