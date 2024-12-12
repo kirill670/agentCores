@@ -1,5 +1,5 @@
-# agentCore.py
-"""agentCore
+# agentCores.py
+"""agentCores
 
 A flexible framework for creating and managing AI agent configurations.
 
@@ -17,20 +17,20 @@ Key Features:
 
 Basic Usage:
     ```python
-    from agentCore import agentCore
+    from agentCores import agentCores
     
     # Create with default configuration
-    agentCoreInstance = agentCore()
+    agentCoresInstance = agentCores()
     
     # Create with custom database paths
-    agentCoreInstance = agentCore(db_config={
+    agentCoresInstance = agentCores(db_config={
         "agent_matrix": "custom_matrix.db",
         "conversation_history": "custom_conversations.db",
         "knowledge_base": "custom_knowledge.db"
     })
     
     # Create an agent with custom configuration
-    agent = agentCoreInstance.mintAgent(
+    agent = agentCoresInstance.mintAgent(
         agent_id="custom_agent",
         db_config={"conversation_history": "custom_agent_conv.db"},
         model_config={"large_language_model": "gpt-4"},
@@ -52,16 +52,16 @@ Advanced Usage:
         }
     }
     
-    agentCoreInstance = agentCore(template=custom_template)
+    agentCoresInstance = agentCores(template=custom_template)
     ```
 
 Installation:
-    pip install agentCore
+    pip install agentCores
 
 Project Links:
-    Homepage: https://github.com/Leoleojames1/agentCore
+    Homepage: https://github.com/Leoleojames1/agentCores
     Documentation: https://agentcore.readthedocs.io/ #NOT AVAILABLE
-    Issues: https://github.com/Leoleojames1/agentCore/issues
+    Issues: https://github.com/Leoleojames1/agentCores/issues
 
 Author: Leo Borcherding
 Version: 0.1.0
@@ -80,7 +80,7 @@ from agentMatrix import agentMatrix
 
 # add uithub scrape, add arxiv
 
-class agentCore:
+class agentCores:
     
     DEFAULT_DB_PATHS = {
         "system": {
@@ -273,7 +273,7 @@ class agentCore:
             deep_merge(base_template["agentCore"], custom_template["agentCore"])
         
         self.base_template = base_template
-        self.agentCore = json.loads(json.dumps(base_template))
+        self.agentCores = json.loads(json.dumps(base_template))
         return base_template
 
     def getNewAgentCore(self) -> Dict:
@@ -316,7 +316,7 @@ class agentCore:
         results = self.agent_library.get(ids=[agent_id])
         if results and results["documents"]:
             loaded_config = json.loads(results["documents"][0])
-            self.agentCore = loaded_config
+            self.agentCores = loaded_config
             return loaded_config
         return None
 
@@ -374,18 +374,18 @@ class agentCore:
 
     def resetAgentCore(self):
         """Reset the current agent core to base template state."""
-        self.agentCore = self.getNewAgentCore()
-        return self.agentCore
+        self.agentCores = self.getNewAgentCore()
+        return self.agentCores
 
     def getCurrentCore(self) -> Dict:
         """Get the current agent core configuration."""
-        return self.agentCore
+        return self.agentCores
 
     def updateCurrentCore(self, updates: Dict):
         """Update the current agent core with new values."""
         self._mergeConfig(self.agentCore["agentCore"], updates)
-        self.agentCore["agentCore"]["version"] += 1
-        self.agentCore["agentCore"]["uid"] = self._generateUID(self.agentCore)
+        self.agentCores["agentCore"]["version"] += 1
+        self.agentCores["agentCore"]["uid"] = self._generateUID(self.agentCores)
         
     def _mergeConfig(self, base: Dict, updates: Dict):
         """Recursively merge configuration updates."""
@@ -714,18 +714,18 @@ class agentCore:
             
 if __name__ == "__main__":
     try:
-        print("\n=== Welcome to agentCore Management Interface ===\n")
+        print("\n=== Welcome to agentCores Management Interface ===\n")
         
         # Initialize agentCore
-        core = agentCore()
+        cores = agentCores()
         
         # Migrate existing agent cores
-        core.migrateAgentCores()
+        cores.migrateAgentCores()
         
         print("agentCore system initialized. Enter '/help' for a list of commands.\n")
         
         # Start the command-line interface
-        core.commandInterface()
+        cores.commandInterface()
 
     except Exception as e:
         print(f"\n⚠️ Unexpected error occurred: {e}")

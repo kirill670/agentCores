@@ -5,7 +5,7 @@ A SQLite-based storage system for managing AI agent configurations and states.
 
 This module provides a simple but robust storage implementation for agent cores,
 maintaining exact structure and versioning in SQLite. It handles the persistence
-layer for the agentCore package, providing CRUD operations for agent configurations.
+layer for the agentCores package, providing CRUD operations for agent configurations.
 
 Features:
 - Efficient SQLite-based storage
@@ -16,7 +16,7 @@ Features:
 
 Example:
     ```python
-    from agentCore import agentMatrix
+    from agentCores import agentMatrix
     
     # Initialize storage
     matrix = agentMatrix("agents.db")
