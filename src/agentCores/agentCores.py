@@ -452,7 +452,56 @@ class agentCores:
             print(f"Linked database '{db_name}' to agent '{agent_id}'")
         else:
             print(f"Agent '{agent_id}' not found")
+
+    def importAgentCores(self, import_db_path: str) -> None:
+        """
+        Import agent cores from another agent_matrix.db file into the current system.
+        
+        Args:
+            import_db_path (str): Path to the agent_matrix.db file to import from
             
+        Raises:
+            FileNotFoundError: If the import database file doesn't exist
+            sqlite3.Error: If there's an error reading from or writing to the databases
+        """
+        if not os.path.exists(import_db_path):
+            raise FileNotFoundError(f"Import database not found: {import_db_path}")
+            
+        print(f"Importing agent cores from: {import_db_path}")
+        
+        try:
+            # Create a temporary agentMatrix instance for the import database
+            import_matrix = agentMatrix(import_db_path)
+            
+            # Get all agents from the import database
+            import_agents = import_matrix.get()
+            
+            if not import_agents["documents"]:
+                print("No agents found in import database.")
+                return
+                
+            # Store each imported agent in the current system
+            for doc, id_, metadata in zip(import_agents["documents"], 
+                                        import_agents["ids"], 
+                                        import_agents["metadatas"]):
+                try:
+                    # Parse the agent configuration
+                    agent_core = json.loads(doc)
+                    
+                    # Store the agent in the current system
+                    self.storeAgentCore(id_, agent_core)
+                    print(f"Imported agent: {id_}")
+                    
+                except json.JSONDecodeError:
+                    print(f"Warning: Failed to parse agent configuration for {id_}")
+                except Exception as e:
+                    print(f"Warning: Failed to import agent {id_}: {str(e)}")
+                    
+            print(f"Import complete. {len(import_agents['documents'])} agents processed.")
+            
+        except Exception as e:
+            raise Exception(f"Error importing agent cores: {str(e)}")
+        
     def commandInterface(self):
         """Command-line interface for managing agents."""
         
@@ -473,6 +522,7 @@ class agentCores:
                 print("  /deleteAgent <uid> - Delete an agent by UID.")
                 print("  /resetAgent <uid> - Reset an agent to the base template.")
                 print("  /chat <agent_id> - Start a chat session with an agent.")
+                print("  /importAgents <db_path> - gets the agentCores from the given db path and stores them in the default agent_matrix.db")
                 print("  /exit - Exit the interface.")
                 
             elif command.startswith("/chat"):
@@ -652,7 +702,16 @@ class agentCores:
                     self.linkDatabase(agent_id, db_name, db_path)
                 except ValueError:
                     print("Usage: /linkDatabase   ")
-                    
+
+            elif command.startswith("/importAgents"):
+                    try:
+                        _, import_path = command.split()
+                        self.importAgentCores(import_path)
+                    except ValueError:
+                        print("Usage: /importAgents <path_to_agent_matrix.db>")
+                    except Exception as e:
+                        print(f"⚠️ Error importing agents: {e}")
+            
             elif command == "/exit":
                 break
             

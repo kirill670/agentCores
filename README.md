@@ -270,6 +270,39 @@ core.loadAgentFromFile("custom_assistant_config.json")
 print("Agent configuration loaded from file and stored in database")
 ```
 
+## importAgentCores
+
+```python
+agentCores.importAgentCores(import_db_path: str) -> None
+"""
+Import agent cores from another agent_matrix.db file into the current system.
+
+    import_db_path: Path to the agent_matrix.db file to import from.
+    
+This method imports all agent configurations from another agent_matrix.db file into the current system. It will merge the imported agents with existing ones, updating any agents with matching IDs. Throws FileNotFoundError if the import database doesn't exist or Exception if there are issues during import.
+"""
+```
+
+example usage:
+```python
+# Import agents from another agent_matrix.db
+core = agentCores()
+
+# Import from a specific database file
+core.importAgentCores("path/to/other/agent_matrix.db")
+
+# Import from a backup
+core.importAgentCores("backups/agent_matrix_backup.db")
+
+# Import from a shared team configuration
+core.importAgentCores("team/shared_agent_matrix.db")
+
+# Check the imported agents
+agents = core.listAgentCores()
+for agent in agents:
+    print(f"ID: {agent['agent_id']}, UID: {agent['uid']}, Version: {agent['version']}")
+```
+
 ## commandInterface
 
 ```python
@@ -298,17 +331,22 @@ This will start the agentCores Management Interface where you can manage your ag
 Start by using the /help command:
 ```cmd
 Enter commands to manage agent cores. Type '/help' for options.
+    
 > /help
+
 Commands:
-  /agentCores - List all agent cores.
-  /showAgent <agent_id> - Show agents with the specified ID.
-  /createAgent <template_id> <new_agent_id> - Mint a new agent.
-  /storeAgent <file_path> - Store agentCore from json path.
-  /deleteAgent <uid> - Delete an agent by UID.
-  /exportAgent <agent_id> - Export agentCore to json.
-  /deleteAgent <uid> - Delete an agent by UID.
-  /resetAgent <uid> - Reset an agent to the base template.
-  /exit - Exit the interface.
+    /agentCores - List all agent cores.
+    /showAgent <agent_id> - Show agents with the specified ID.
+    /createAgent <template_id> <new_agent_id> - Mint a new agent.
+    /createCustomAgent - Interactive custom agent creation.
+    /createDatabase <name> <path> - Create a new database.
+    /linkDatabase <agent_id> <name> <path> - Link database to agent.
+    /storeAgent <file_path> - Store agentCore from json path.
+    /exportAgent <agent_id> - Export agentCore to json.
+    /deleteAgent <uid> - Delete an agent by UID.
+    /resetAgent <uid> - Reset an agent to the base template.
+    /chat <agent_id> - Start a chat session with an agent."
+    /exit - Exit the interface."
 ```
 
 Now to get the available agentCores:
