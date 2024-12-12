@@ -30,82 +30,6 @@ The test shows everything working as intended:
 pip install agentCore
 ```
 
-## Basic Usage
-
-```python
-from agentCore import agentCore
-from ollama import chat
-
-# Initialize agentCore
-core = agentCore()
-
-# Create basic Ollama agent configuration
-basic_config = {
-    "agent_id": "basic_assistant",
-    "models": {
-        "large_language_model": "llama2",
-        "embedding_model": "nomic-embed-text"
-    },
-    "prompts": {
-        "user_input_prompt": "You are a helpful assistant using local models.",
-        "agentPrompts": {
-            "llmSystemPrompt": "Focus on providing clear, accurate responses. Break down complex topics into understandable explanations.",
-            "llmBoosterPrompt": "Include relevant examples when possible and highlight key points for better understanding."
-        }
-    },
-    "commandFlags": {
-        "STREAM_FLAG": True,
-        "LOCAL_MODEL": True
-    }
-}
-
-# Create the agent
-agent = core.mintAgent(
-    agent_id="basic_assistant",
-    model_config=basic_config["models"],
-    prompt_config=basic_config["prompts"],
-    command_flags=basic_config["commandFlags"]
-)
-
-# Basic chat function
-def chat_with_agent(agent_config, prompt):
-    system_prompt = (
-        f"{agent_config['agentCore']['prompts']['user_input_prompt']} "
-        f"{agent_config['agentCore']['prompts']['agentPrompts']['llmSystemPrompt']} "
-        f"{agent_config['agentCore']['prompts']['agentPrompts']['llmBoosterPrompt']}"
-    )
-    
-    stream = chat(
-        model=agent_config["agentCore"]["models"]["large_language_model"],
-        messages=[
-            {'role': 'system', 'content': system_prompt},
-            {'role': 'user', 'content': prompt}
-        ],
-        stream=True,
-    )
-    
-    for chunk in stream:
-        print(chunk['message']['content'], end='', flush=True)
-
-# Example usage
-chat_with_agent(agent, "Explain how neural networks work")
-```
-
-## Command-Line Creation
-
-You can also create custom agents interactively using the command interface:
-
-
-### Additional Database Management
-
-```bash
-# Create a new database
-> /createDatabase research_results research_results.db
-
-# Link database to existing agent
-> /linkDatabase advanced_research_agent citations citations.db
-```
-
 # command-line interface
 Start by using the /help command:
 ```cmd
@@ -190,6 +114,77 @@ Now to export an agentCore to json execute the following:
 ```cmd
 > /exportAgent general_navigator_agent
 Agent core saved to general_navigator_agent_core.json
+```
+
+## Basic Usage
+
+```python
+from agentCore import agentCore
+from ollama import chat
+
+# Initialize agentCore
+core = agentCore()
+
+# Create basic Ollama agent configuration
+basic_config = {
+    "agent_id": "basic_assistant",
+    "models": {
+        "large_language_model": "llama2",
+        "embedding_model": "nomic-embed-text"
+    },
+    "prompts": {
+        "user_input_prompt": "You are a helpful assistant using local models.",
+        "agentPrompts": {
+            "llmSystemPrompt": "Focus on providing clear, accurate responses. Break down complex topics into understandable explanations.",
+            "llmBoosterPrompt": "Include relevant examples when possible and highlight key points for better understanding."
+        }
+    },
+    "commandFlags": {
+        "STREAM_FLAG": True,
+        "LOCAL_MODEL": True
+    }
+}
+
+# Create the agent
+agent = core.mintAgent(
+    agent_id="basic_assistant",
+    model_config=basic_config["models"],
+    prompt_config=basic_config["prompts"],
+    command_flags=basic_config["commandFlags"]
+)
+
+# Basic chat function
+def chat_with_agent(agent_config, prompt):
+    system_prompt = (
+        f"{agent_config['agentCore']['prompts']['user_input_prompt']} "
+        f"{agent_config['agentCore']['prompts']['agentPrompts']['llmSystemPrompt']} "
+        f"{agent_config['agentCore']['prompts']['agentPrompts']['llmBoosterPrompt']}"
+    )
+    
+    stream = chat(
+        model=agent_config["agentCore"]["models"]["large_language_model"],
+        messages=[
+            {'role': 'system', 'content': system_prompt},
+            {'role': 'user', 'content': prompt}
+        ],
+        stream=True,
+    )
+    
+    for chunk in stream:
+        print(chunk['message']['content'], end='', flush=True)
+
+# Example usage
+chat_with_agent(agent, "Explain how neural networks work")
+```
+
+### Additional Database Management
+
+```bash
+# Create a new database
+> /createDatabase research_results research_results.db
+
+# Link database to existing agent
+> /linkDatabase advanced_research_agent citations citations.db
 ```
 
 # Advanced Usage

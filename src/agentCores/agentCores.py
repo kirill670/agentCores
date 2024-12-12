@@ -68,6 +68,7 @@ Version: 0.1.0
 Date: 2024-12-11
 License: MIT
 """
+# add uithub scrape, add arxiv
 import sqlite3
 import json
 import os
@@ -76,9 +77,7 @@ import hashlib
 import copy
 from pathlib import Path
 from typing import Optional, Dict, Any
-from agentMatrix import agentMatrix
-
-# add uithub scrape, add arxiv
+from .agentMatrix import agentMatrix
 
 class agentCores:
     
@@ -656,6 +655,8 @@ class agentCores:
 
     def chat_with_agent(self, agent_id: str):
         """Interactive chat session with a specified agent."""
+        #TODO add agentCores default conversation history db
+        #TODO allow get access to default knowledge bases
         try:
             # Load the agent
             agent = self.loadAgentCore(agent_id)
