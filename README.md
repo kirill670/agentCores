@@ -1,8 +1,10 @@
 # agentCores
-![agentCores Logo](https://github.com/Leoleojames1/agentCores/agentCoresLogoFix.png)
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Leoleojames1/agentCores/main/src/agentCores/data/agentCoresLogoFix.png" alt="agentCores logo" width="450"/>
+</p>
 
 # agentCores: Advanced AI Agent Management System
-
+agentCoresLogoFix.png
 agentCores is a powerful and flexible Python package designed to streamline the creation, management, and deployment of AI agents. It provides a robust framework for handling complex agent configurations, making it easier for developers and researchers to work with multiple AI models and agent types.
 
 ## What agentCores Does
