@@ -1,6 +1,6 @@
 # agentCore
 <p align="center">
-  <img src="agentCore1.png" alt="agentCore logo" width="450"/>
+  <img src="src/agentCores/agentCore1.png" alt="agentCore logo" width="450"/>
 </p>
 
 # agentCore: Advanced AI Agent Management System

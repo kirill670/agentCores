@@ -712,22 +712,3 @@ class agentCores:
 
         except Exception as e:
             print(f"\n⚠️ Error in chat session: {e}")
-            
-if __name__ == "__main__":
-    try:
-        print("\n=== Welcome to agentCores Management Interface ===\n")
-        
-        # Initialize agentCore
-        cores = agentCores()
-        
-        # Migrate existing agent cores
-        cores.migrateAgentCores()
-        
-        print("agentCore system initialized. Enter '/help' for a list of commands.\n")
-        
-        # Start the command-line interface
-        cores.commandInterface()
-
-    except Exception as e:
-        print(f"\n⚠️ Unexpected error occurred: {e}")
-        raise
