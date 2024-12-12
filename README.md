@@ -187,7 +187,7 @@ example usage:
 agent_config = {
     "agentCore": {
         "agent_id": "custom_assistant",
-        "models": {"large_language_model": "gpt-4"},
+        "models": {"large_language_model": "phi3"},
         "prompts": {"user_input_prompt": "You are a helpful assistant."}
     }
 }

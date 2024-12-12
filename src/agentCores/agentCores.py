@@ -77,6 +77,7 @@ import hashlib
 import copy
 from pathlib import Path
 from typing import Optional, Dict, Any
+from pkg_resources import resource_filename
 from .agentMatrix import agentMatrix
 
 class agentCores:
@@ -100,11 +101,16 @@ class agentCores:
     }
     
     def __init__(self, 
-                 db_path: str = "agent_matrix.db",
+                 db_path: str = None,
                  db_config: Optional[Dict] = None,
                  template: Optional[Dict] = None):
         """Initialize AgentCore with optional custom configuration."""
         self.current_date = time.strftime("%Y-%m-%d")
+        
+        # Use package data path if no custom path provided
+        if db_path is None:
+            db_path = resource_filename('agentCores', 'data/agent_matrix.db')
+            
         self.agent_library = agentMatrix(db_path)
         
         # Initialize template with any custom configuration
