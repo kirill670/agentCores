@@ -3,34 +3,298 @@
   <img src="agentCore1.png" alt="agentCore logo" width="450"/>
 </p>
 
-This project provides files with methods to handle agentCores for agent_matrix.db
+# agentCore: Advanced AI Agent Management System
 
-agentCore System:
-1. Successfully initializes and stores your predefined agents in SQLite
-2. Lists all available agent cores
-3. Can mint new instances from any template
-4. Properly handles loading and saving configurations
+agentCore is a powerful and flexible Python package designed to streamline the creation, management, and deployment of AI agents. It provides a robust framework for handling complex agent configurations, making it easier for developers and researchers to work with multiple AI models and agent types.
 
-This gives you a solid foundation to:
-1. Move the agent templates to separate JSON files later
-2. Add more agent types easily
-3. Track instances and templates in the database
-4. Eventually add embedding functionality
+## What agentCore Does
 
-The test shows everything working as intended:
-- All predefined agents are loaded and stored
-- Can create new instances with overrides (like the Minecraft agent with llama2)
-- Loading and verification works
-- Cleanup works
+1. **Agent Configuration Management**: 
+   - Create, store, and manage AI agent configurations in a structured SQLite database.
+   - Support for various agent types, from simple chatbots to complex multi-modal AI systems.
 
-#TODO add pydantic agentCores
+2. **Template-Based Agent Creation**:
+   - Define and use templates for quick agent instantiation.
+   - Easily create new agents based on existing templates with custom overrides.
+
+3. **Versioning and Tracking**:
+   - Maintain version history of agent configurations.
+   - Generate unique identifiers (UIDs) for each agent instance.
+
+4. **Flexible Database Integration**:
+   - Store agent data, conversation histories, and knowledge bases in SQLite.
+   - Customizable database paths and configurations for different project needs.
+
+5. **Command-Line Interface**:
+   - Intuitive CLI for managing agents, perfect for quick tweaks and testing.
+   - Commands for listing, creating, modifying, and deleting agents.
+
+6. **Model and Prompt Management**:
+   - Configure and manage different AI models (e.g., language models, vision models).
+   - Store and version control prompts and system messages.
+
+7. **Extensibility and Customization**:
+   - Easy integration with various AI libraries and APIs (e.g., Ollama, OpenAI).
+   - Support for custom flags and agent-specific settings.
+
+## Key Benefits
+
+- **Centralized Management**: Keep all your AI agents organized in one place.
+- **Rapid Prototyping**: Quickly create and test different agent configurations.
+- **Scalability**: Easily manage multiple agents for complex AI systems or large-scale deployments.
+- **Version Control**: Track changes and revert to previous configurations when needed.
+- **Flexibility**: Adapt to various AI frameworks and model types.
+- **Standardization**: Enforce consistent structure across different agent types.
+
+## Ideal For
+
+- **AI Researchers**: Experiment with different agent configurations and model combinations.
+- **Chatbot Developers**: Manage multiple chatbots with different personalities or capabilities.
+- **MLOps Teams**: Streamline the deployment and management of AI models in production.
+- **Game Developers**: Create and manage diverse NPC behaviors and AI opponents.
+- **Education Platforms**: Develop and maintain various AI tutors or educational assistants.
+
+## Future-Ready Features
+
+1. **JSON Template Support**: Easily export and import agent configurations.
+2. **Embedding Integration**: Planned support for managing and utilizing embeddings.
+3. **Advanced Analytics**: Track agent performance and usage statistics.
+4. **Multi-Agent Orchestration**: Tools for managing interactions between multiple agents.
+5. **pydantic & ollama agentCores**: Future agentCores built around ollama & pydantic agents. Unleashing flexible local agent dbs for advanced code splicing, and agent state monitoring.
+
+agentCore provides a solid foundation for building sophisticated AI agent systems, offering the flexibility and scalability needed for both research and production environments. Whether you're working on a simple chatbot or a complex multi-agent system, agentCore simplifies the process of creating, managing, and deploying AI agents.
     
 # installation
 ```bash
 pip install agentCore
 ```
 
-# command-line interface
+# core methods
+
+## __init__
+```python
+agentCores.__init__(db_path: str = "agent_matrix.db", db_config: Optional[Dict] = None, template: Optional[Dict] = None)
+"""
+Initialize the agentCore system with optional custom configuration.
+
+    db_path: Path to the main agent matrix database.
+    db_config: Custom database configuration.
+    template: Custom agent template.
+
+This method sets up the agentCore system, initializing the database and loading any custom configurations. 
+It's the first method you should call when using the agentCore package.
+"""
+```
+
+example usage:
+```python
+from agentCores import agentCores
+
+# Initialize with default settings
+core = agentCores()
+
+# Initialize with custom database path
+core = agentCores(db_path="/path/to/custom/agent_matrix.db")
+
+# Initialize with custom database configuration
+custom_db_config = {
+    "system": {"agent_matrix": "/path/to/custom/matrix.db"},
+    "agents": {"conversation": "/path/to/custom/conversations/{agent_id}.db"}
+}
+core = agentCores(db_config=custom_db_config)
+
+# Initialize with custom template
+custom_template = {
+    "agentCore": {
+        "models": {"large_language_model": "phi3"},
+        "prompts": {"user_input_prompt": "You are the agentCores assistant..."}
+    }
+}
+core = agentCores(template=custom_template)
+```
+
+## mintAgent
+
+```python
+agentCores.mintAgent(agent_id: str, db_config: Optional[Dict] = None, model_config: Optional[Dict] = None, prompt_config: Optional[Dict] = None, command_flags: Optional[Dict] = None) -> Dict
+"""
+Create a new agent with custom configuration.
+
+    agent_id: Unique identifier for the new agent.
+    db_config: Custom database configuration for the agent.
+    model_config: Model configuration for the agent.
+    prompt_config: Prompt configuration for the agent.
+    command_flags: Command flags for the agent.
+
+
+This method creates a new agent with the specified configurations. It returns the complete agent configuration as a dictionary.
+"""
+```
+
+example usage:
+```python
+new_agent = core.mintAgent(
+    agent_id="custom_assistant",
+    model_config={"large_language_model": "phi3"},
+    prompt_config={
+        "user_input_prompt": "You are a helpful assistant.",
+        "agentPrompts": {
+            "llmSystemPrompt": "Provide clear and concise answers."
+        }
+    },
+    command_flags={"STREAM_FLAG": True}
+)
+```
+
+## loadAgentCore
+
+```python
+agentCores.loadAgentCore(agent_id: str) -> Optional[Dict[str, Any]]
+"""
+Load an agent configuration from the library.
+
+    agent_id: ID of the agent to load.
+
+This method retrieves the configuration of a previously stored agent. It returns the agent's configuration as a dictionary if found, or None if the agent doesn't exist.
+"""
+```
+
+example usage:
+```python
+agent_config = core.loadAgentCore("ehartfordDolphin")
+if agent_config:
+    print(f"Loaded agent: {agent_config['agentCore']['agent_id']}")
+else:
+    print("Agent not found")
+```
+
+## storeAgentCore
+
+```python
+agentCores.storeAgentCore(agent_id: str, core_config: Dict[str, Any]) -> None
+"""
+Store an agent configuration in the matrix.
+
+    agent_id: ID of the agent to store.
+    core_config: Configuration of the agent to store.
+
+This method saves or updates an agent's configuration in the database.
+"""
+```
+
+example usage:
+```python
+agent_config = {
+    "agentCore": {
+        "agent_id": "custom_assistant",
+        "models": {"large_language_model": "gpt-4"},
+        "prompts": {"user_input_prompt": "You are a helpful assistant."}
+    }
+}
+core.storeAgentCore("custom_assistant", agent_config)
+```
+
+## listAgentCores
+
+```python
+agentCores.listAgentCores() -> list
+"""
+List all available agent cores.
+
+This method returns a list of all stored agent configurations, including their IDs, UIDs, and versions.
+"""
+```
+
+example usage:
+```python
+all_agents = core.listAgentCores()
+for agent in all_agents:
+    print(f"ID: {agent['agent_id']}, UID: {agent['uid']}, Version: {agent['version']}")
+```
+
+## deleteAgentCore
+
+```python
+agentCores.deleteAgentCore(agent_id: str) -> None
+"""
+Remove an agent configuration from storage.
+
+    agent_id: ID of the agent to delete.
+
+This method deletes an agent's configuration from the database.
+"""
+```
+
+example usage:
+```python
+core.deleteAgentCore("custom_assistant")
+print("Agent deleted")
+```
+
+## saveToFile
+
+```python
+agentCores.saveToFile(agent_id: str, file_path: str) -> None
+"""
+Save an agent configuration to a JSON file.
+
+    agent_id: ID of the agent to save.
+    file_path: Path to save the JSON file.
+
+This method exports an agent's configuration to a JSON file.
+"""
+```
+
+example usage:
+```python
+core.saveToFile("custom_assistant", "custom_assistant_config.json")
+print("Agent configuration saved to file")
+```
+
+## loadAgentFromFile
+
+```python
+agentCores.loadAgentFromFile(file_path: str) -> None
+"""
+Load an agent configuration from a JSON file and store in matrix.
+
+    file_path: Path to the JSON file to load.
+
+This method imports an agent configuration from a JSON file and stores it in the database.
+"""
+```
+
+example usage:
+```python
+core.loadAgentFromFile("custom_assistant_config.json")
+print("Agent configuration loaded from file and stored in database")
+```
+
+## commandInterface
+
+```python
+agentCores.commandInterface()
+"""
+Start the command-line interface for managing agents.
+
+This method launches an interactive command-line interface for managing agent cores.
+"""
+```
+
+example usage:
+```python
+core.commandInterface()
+```
+
+# Command-line Interface
+
+To access the command-line interface, run:
+
+```shellscript
+python -m agentCores
+```
+This will start the agentCores Management Interface where you can manage your agents using various commands.
+
 Start by using the /help command:
 ```cmd
 Enter commands to manage agent cores. Type '/help' for options.
@@ -47,7 +311,7 @@ Commands:
   /exit - Exit the interface.
 ```
 
-Now to get the agentCores type:
+Now to get the available agentCores:
 ```
 > /agentCores
 
@@ -116,7 +380,17 @@ Now to export an agentCore to json execute the following:
 Agent core saved to general_navigator_agent_core.json
 ```
 
-## Basic Usage
+### Additional Database Management
+
+```bash
+# Create a new database
+> /createDatabase research_results research_results.db
+
+# Link database to existing agent
+> /linkDatabase advanced_research_agent citations citations.db
+```
+
+## Basic Ollama Usage Example
 
 ```python
 from agentCore import agentCore
@@ -177,17 +451,7 @@ def chat_with_agent(agent_config, prompt):
 chat_with_agent(agent, "Explain how neural networks work")
 ```
 
-### Additional Database Management
-
-```bash
-# Create a new database
-> /createDatabase research_results research_results.db
-
-# Link database to existing agent
-> /linkDatabase advanced_research_agent citations citations.db
-```
-
-# Advanced Usage
+# Advanced Ollama Chatbot Usage Example
 We can now construct advanced local assistants with ollama agentCores, and embedded db filenames, for nested knowledgeBase architectures.
 
 ```python
