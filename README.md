@@ -66,7 +66,7 @@ agentCores provides a solid foundation for building sophisticated AI agent syste
     
 # installation
 ```bash
-pip install agentCore
+pip install agentCores
 ```
 
 # quick start
