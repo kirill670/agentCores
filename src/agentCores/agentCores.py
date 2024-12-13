@@ -14,21 +14,23 @@ Key Features:
 4. Command-line interface for agent management
 5. Support for custom database configurations
 6. Flexible model and prompt management
+7. SwarmAgentFarm for managing multiple agents
+8. Optional integration with g4f API for chat interactions
 
 Basic Usage:
     ```python
     from agentCores import agentCores
-    
+
     # Create with default configuration
     agentCoresInstance = agentCores()
-    
+
     # Create with custom database paths
     agentCoresInstance = agentCores(db_config={
         "agent_matrix": "custom_matrix.db",
         "conversation_history": "custom_conversations.db",
         "knowledge_base": "custom_knowledge.db"
     })
-    
+
     # Create an agent with custom configuration
     agent = agentCoresInstance.mintAgent(
         agent_id="custom_agent",
@@ -37,7 +39,7 @@ Basic Usage:
         prompt_config={"user_input_prompt": "Custom prompt"}
     )
     ```
-
+    
 Advanced Usage:
     ```python
     # Create with custom template
@@ -68,7 +70,7 @@ Version: 0.1.0
 Date: 2024-12-11
 License: MIT
 """
-# add uithub scrape, add arxiv
+
 import sqlite3
 import json
 import os
@@ -76,9 +78,17 @@ import time
 import hashlib
 import copy
 from pathlib import Path
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 from pkg_resources import resource_filename
 from .agentMatrix import agentMatrix
+
+# Optional g4f integration
+try:
+    from g4f import Chat
+    G4F_AVAILABLE = True
+except ImportError:
+    G4F_AVAILABLE = False
+
 
 class agentCores:
     
@@ -100,7 +110,7 @@ class agentCores:
         }
     }
     
-    def __init__(self, 
+    def __init__(self,
                  db_path: str = None,
                  db_config: Optional[Dict] = None,
                  template: Optional[Dict] = None):
@@ -119,7 +129,19 @@ class agentCores:
         # Update database configuration if provided
         if db_config:
             self.base_template["agentCore"]["databases"].update(db_config)
-
+        
+        # Initialize directory structure and databases
+        self.base_path = Path(db_path).parent
+        self._init_directory_structure()
+        self.db_paths = self._init_db_paths(db_config)
+        self.init_base_databases()
+        
+        # Load system templates or initialize defaults
+        self.templates = self.loadTemplates()
+        
+        # Current agent core configuration
+        self.agentCores = self.getNewAgentCore()
+    
     def _init_db_paths(self, custom_config: Optional[Dict] = None) -> Dict:
         """Initialize all database paths with optional custom configuration"""
         db_paths = copy.deepcopy(self.DEFAULT_DB_PATHS)
@@ -128,13 +150,13 @@ class agentCores:
         for category in db_paths:
             for key, path in db_paths[category].items():
                 db_paths[category][key] = str(self.base_path / path)
-
+        
         # Apply any custom configurations
         if custom_config:
             for category, paths in custom_config.items():
                 if category in db_paths:
                     db_paths[category].update(paths)
-
+        
         return db_paths
     
     def get_agent_db_paths(self, agent_id: str) -> Dict[str, str]:
@@ -175,7 +197,7 @@ class agentCores:
             self._init_specific_db(db_type, db_path)
             
         return paths
-
+    
     def _init_specific_db(self, db_type: str, db_path: str):
         """Initialize a specific type of database with the appropriate schema"""
         with sqlite3.connect(db_path) as conn:
@@ -209,7 +231,33 @@ class agentCores:
                         metadata TEXT
                     )
                 """)
-                
+            elif db_type == "model_configs":
+                conn.execute("""
+                    CREATE TABLE IF NOT EXISTS model_configs (
+                        id INTEGER PRIMARY KEY,
+                        model_name TEXT,
+                        configuration TEXT
+                    )
+                """)
+            elif db_type == "prompt_templates":
+                conn.execute("""
+                    CREATE TABLE IF NOT EXISTS prompt_templates (
+                        id INTEGER PRIMARY KEY,
+                        template_name TEXT,
+                        template_content TEXT
+                    )
+                """)
+            elif db_type == "global_knowledge":
+                conn.execute("""
+                    CREATE TABLE IF NOT EXISTS global_knowledge (
+                        id INTEGER PRIMARY KEY,
+                        topic TEXT,
+                        content TEXT,
+                        source TEXT,
+                        last_updated TEXT
+                    )
+                """)
+    
     def initTemplate(self, custom_template: Optional[Dict] = None) -> Dict:
         """Initialize or customize the agent template while maintaining required structure."""
         # Base template structure (as shown in previous response)
@@ -259,6 +307,12 @@ class agentCores:
                     "agent_matrix": "agent_matrix.db",
                     "conversation_history": "{agent_id}_conversation.db",
                     "knowledge_base": "knowledgeBase.db"
+                },
+                "chat_interface": {
+                    "use_g4f": False,  # New configuration option
+                    "g4f_settings": {
+                        "provider": "default"  # Placeholder for g4f settings
+                    }
                 }
             }
         }
@@ -280,7 +334,7 @@ class agentCores:
         self.base_template = base_template
         self.agentCores = json.loads(json.dumps(base_template))
         return base_template
-
+    
     def getNewAgentCore(self) -> Dict:
         """Get a fresh agent core based on the base template."""
         return json.loads(json.dumps(self.base_template))  # Deep copy
@@ -306,7 +360,7 @@ class agentCores:
             new_core["agentCore"]["commandFlags"].update(config["commandFlags"])
             
         return new_core
-
+    
     def storeAgentCore(self, agent_id: str, core_config: Dict[str, Any]) -> None:
         """Store an agent configuration in the matrix."""
         core_json = json.dumps(core_config)
@@ -315,7 +369,7 @@ class agentCores:
             ids=[agent_id],  # No need for extra agent_ prefix, keep IDs clean
             metadatas=[{"agent_id": agent_id, "save_date": self.current_date}]
         )
-
+    
     def loadAgentCore(self, agent_id: str) -> Optional[Dict[str, Any]]:
         """Load an agent configuration from the library."""
         results = self.agent_library.get(ids=[agent_id])
@@ -324,7 +378,7 @@ class agentCores:
             self.agentCores = loaded_config
             return loaded_config
         return None
-
+    
     def listAgentCores(self) -> list:
         """List all available agent cores."""
         all_agents = self.agent_library.get()
@@ -348,7 +402,8 @@ class agentCores:
                   db_config: Optional[Dict] = None,
                   model_config: Optional[Dict] = None,
                   prompt_config: Optional[Dict] = None,
-                  command_flags: Optional[Dict] = None) -> Dict:
+                  command_flags: Optional[Dict] = None,
+                  chat_interface: Optional[Dict] = None) -> Dict:
         """Create a new agent with proper database initialization."""
         # Create agent-specific databases
         agent_db_paths = self.create_agent_databases(agent_id)
@@ -358,10 +413,7 @@ class agentCores:
             agent_db_paths.update(db_config)
         
         # Create agent configuration
-        new_config = self.getNewAgentCore()
-        new_config["agentCore"]["agent_id"] = agent_id
-        new_config["agentCore"]["save_state_date"] = self.current_date
-        new_config["agentCore"]["version"] = 1
+        new_config = self._createAgentConfig(agent_id, {})
         new_config["agentCore"]["databases"] = agent_db_paths
         
         if model_config:
@@ -370,28 +422,31 @@ class agentCores:
             new_config["agentCore"]["prompts"].update(prompt_config)
         if command_flags:
             new_config["agentCore"]["commandFlags"].update(command_flags)
+        if chat_interface:
+            new_config["agentCore"]["chat_interface"].update(chat_interface)
         
         new_config["agentCore"]["uid"] = self._generateUID(new_config)
+        new_config["agentCore"]["version"] = 1
         
         # Store the new agent
         self.storeAgentCore(agent_id, new_config)
         return new_config
-
+    
     def resetAgentCore(self):
         """Reset the current agent core to base template state."""
         self.agentCores = self.getNewAgentCore()
         return self.agentCores
-
+    
     def getCurrentCore(self) -> Dict:
         """Get the current agent core configuration."""
         return self.agentCores
-
+    
     def updateCurrentCore(self, updates: Dict):
         """Update the current agent core with new values."""
-        self._mergeConfig(self.agentCore["agentCore"], updates)
+        self._mergeConfig(self.agentCores["agentCore"], updates)
         self.agentCores["agentCore"]["version"] += 1
         self.agentCores["agentCore"]["uid"] = self._generateUID(self.agentCores)
-        
+    
     def _mergeConfig(self, base: Dict, updates: Dict):
         """Recursively merge configuration updates."""
         for key, value in updates.items():
@@ -399,18 +454,18 @@ class agentCores:
                 self._mergeConfig(base[key], value)
             else:
                 base[key] = value
-
+    
     def deleteAgentCore(self, agent_id: str) -> None:
         """Remove an agent configuration from storage."""
         self.agent_library.delete(ids=[agent_id])
-
+    
     def saveToFile(self, agent_id: str, file_path: str) -> None:
         """Save an agent configuration to a JSON file."""
         config = self.loadAgentCore(agent_id)
         if config:
             with open(file_path, 'w') as f:
                 json.dump(config, f, indent=4)
-
+    
     def loadAgentFromFile(self, file_path: str) -> None:
         """Load an agent configuration from a JSON file and store in matrix."""
         with open(file_path, 'r') as f:
@@ -419,7 +474,7 @@ class agentCores:
                 self.storeAgentCore(config["agentCore"]["agent_id"], config)
             else:
                 raise ValueError("Invalid agent configuration file")
-        
+    
     def migrateAgentCores(self):
         """Add versioning and UID to existing agent cores."""
         print("Migrating agent cores to include versioning and UID...")
@@ -442,7 +497,7 @@ class agentCores:
         with sqlite3.connect(db_path) as conn:
             conn.execute("CREATE TABLE IF NOT EXISTS agent_data (id INTEGER PRIMARY KEY, data JSON)")
         print(f"Created database: {db_path}")
-
+    
     def linkDatabase(self, agent_id: str, db_name: str, db_path: str) -> None:
         """Link a database to an existing agent."""
         agent = self.loadAgentCore(agent_id)
@@ -452,7 +507,7 @@ class agentCores:
             print(f"Linked database '{db_name}' to agent '{agent_id}'")
         else:
             print(f"Agent '{agent_id}' not found")
-
+    
     def importAgentCores(self, import_db_path: str) -> None:
         """
         Import agent cores from another agent_matrix.db file into the current system.
@@ -501,7 +556,7 @@ class agentCores:
             
         except Exception as e:
             raise Exception(f"Error importing agent cores: {str(e)}")
-        
+    
     def commandInterface(self):
         """Command-line interface for managing agents."""
         
@@ -512,7 +567,7 @@ class agentCores:
             if command == "/help":
                 print("Commands:")
                 print("  /agentCores - List all agent cores.")
-                print("  /showAgent <agent_id> - Show agents with the specified ID.")
+                print("  /showAgent <agent_id> - Show agent with the specified ID.")
                 print("  /createAgent <template_id> <new_agent_id> - Mint a new agent.")
                 print("  /createCustomAgent - Interactive custom agent creation.")
                 print("  /createDatabase <name> <path> - Create a new database.")
@@ -522,7 +577,8 @@ class agentCores:
                 print("  /deleteAgent <uid> - Delete an agent by UID.")
                 print("  /resetAgent <uid> - Reset an agent to the base template.")
                 print("  /chat <agent_id> - Start a chat session with an agent.")
-                print("  /importAgents <db_path> - gets the agentCores from the given db path and stores them in the default agent_matrix.db")
+                print("  /importAgents <db_path> - Import agentCores from the given db path.")
+                print("  /swarmFarm <config_file> - Initialize SwarmAgentFarm with a config file.")
                 print("  /exit - Exit the interface.")
                 
             elif command.startswith("/chat"):
@@ -553,10 +609,15 @@ class agentCores:
                     print("Usage: /showAgent <agent_id>")
                     
             elif command.startswith("/createAgent"):
-                _, template_id, new_agent_id = command.split()
-                self.mintAgent(template_id, new_agent_id)
-                print(f"Agent '{new_agent_id}' created successfully.")
-                
+                try:
+                    _, template_id, new_agent_id = command.split()
+                    self.mintAgent(template_id, new_agent_id)
+                    print(f"Agent '{new_agent_id}' created successfully.")
+                except ValueError:
+                    print("Usage: /createAgent <template_id> <new_agent_id>")
+                except Exception as e:
+                    print(f"⚠️ Error creating agent: {e}")
+                    
             elif command.startswith("/storeAgent"):
                 try:
                     # Debug print to see the full command
@@ -569,13 +630,13 @@ class agentCores:
 
                     with open(file_path, "r") as file:
                         agent_core = json.load(file)
-
+                    
                     # Debug print to check the loaded JSON content
                     print(f"Loaded JSON: {agent_core}")
 
                     if "agentCore" not in agent_core:
                         print("Invalid JSON structure. The file must contain an 'agentCore' object.")
-                        return
+                        continue
 
                     agent_id = agent_core["agentCore"].get("agent_id")
                     uid = agent_core["agentCore"].get("uid")
@@ -585,7 +646,7 @@ class agentCores:
 
                     if not agent_id or not uid:
                         print("Invalid agent core. Both 'agent_id' and 'uid' are required.")
-                        return
+                        continue
 
                     # Check if this agent already exists in the database
                     existing_agents = self.agent_library.get(ids=[agent_id])
@@ -599,11 +660,11 @@ class agentCores:
                             # Update the existing agent
                             self.storeAgentCore(agent_id, agent_core)
                             print(f"Agent core '{agent_id}' with UID '{uid}' updated successfully.")
-                            return
-
-                    # Otherwise, create a new agent core
-                    self.storeAgentCore(agent_id, agent_core)
-                    print(f"Agent core '{agent_id}' with UID '{uid}' added successfully.")
+                            break
+                    else:
+                        # Otherwise, create a new agent core
+                        self.storeAgentCore(agent_id, agent_core)
+                        print(f"Agent core '{agent_id}' with UID '{uid}' added successfully.")
 
                 except FileNotFoundError:
                     print(f"File not found: {file_path}")
@@ -613,7 +674,7 @@ class agentCores:
                     print("Usage: /storeAgent <file_path>")
                 except Exception as e:
                     print(f"⚠️ Error storing agent core: {e}")
-
+    
             elif command.startswith("/exportAgent"):
                 try:
                     _, agent_id = command.split()
@@ -634,18 +695,35 @@ class agentCores:
                     print(f"⚠️ Error saving agent core: {e}")
                     
             elif command.startswith("/deleteAgent"):
-                _, uid = command.split()
-                self.deleteAgentCore(uid)
-                print(f"Agent with UID '{uid}' deleted.")
-                
+                try:
+                    _, uid = command.split()
+                    # Fetch agent by UID
+                    agent = self.agent_library.get_by_uid(uid)
+                    if agent:
+                        self.deleteAgentCore(agent["agent_id"])
+                        print(f"Agent with UID '{uid}' deleted.")
+                    else:
+                        print(f"No agent found with UID '{uid}'.")
+                except ValueError:
+                    print("Usage: /deleteAgent <uid>")
+                except Exception as e:
+                    print(f"⚠️ Error deleting agent: {e}")
+                    
             elif command.startswith("/resetAgent"):
-                _, uid = command.split()
-                agent = self.loadAgentCore(uid)
-                if agent:
-                    self.resetAgentCore()
-                    print(f"Agent with UID '{uid}' reset.")
-
-            elif command == "/createCustomAgent":
+                try:
+                    _, uid = command.split()
+                    agent = self.agent_library.get_by_uid(uid)
+                    if agent:
+                        self.resetAgentCore()
+                        print(f"Agent with UID '{uid}' reset.")
+                    else:
+                        print(f"No agent found with UID '{uid}'.")
+                except ValueError:
+                    print("Usage: /resetAgent <uid>")
+                except Exception as e:
+                    print(f"⚠️ Error resetting agent: {e}")
+            
+            elif command.startswith("/createCustomAgent"):
                 try:
                     print("\nInteractive Custom Agent Creation")
                     agent_id = input("Enter agent ID: ")
@@ -677,12 +755,23 @@ class agentCores:
                         if create_db.lower() == 'y':
                             self.createDatabase(db_name, db_path)
                     
+                    # Chat interface configuration
+                    chat_interface = {}
+                    use_g4f = input("\nWould you like to use g4f for chat interactions? (y/n): ").strip().lower()
+                    if use_g4f == 'y':
+                        if G4F_AVAILABLE:
+                            chat_interface["use_g4f"] = True
+                            # You can add more g4f-specific settings here
+                        else:
+                            print("g4f package not installed. Please install with: pip install g4f")
+                    
                     # Create the agent
                     agent = self.mintAgent(
                         agent_id=agent_id,
                         model_config=model_config,
                         prompt_config=prompt_config,
-                        db_config=db_config
+                        db_config=db_config,
+                        chat_interface=chat_interface
                     )
                     print(f"\nCreated custom agent: {agent_id}")
                     
@@ -691,33 +780,45 @@ class agentCores:
                     
             elif command.startswith("/createDatabase"):
                 try:
-                    _, db_name, db_path = command.split()
+                    parts = command.split()
+                    if len(parts) != 3:
+                        raise ValueError
+                    _, db_name, db_path = parts
                     self.createDatabase(db_name, db_path)
                 except ValueError:
-                    print("Usage: /createDatabase  ")
-            
+                    print("Usage: /createDatabase <name> <path>")
+                
             elif command.startswith("/linkDatabase"):
                 try:
                     _, agent_id, db_name, db_path = command.split()
                     self.linkDatabase(agent_id, db_name, db_path)
                 except ValueError:
-                    print("Usage: /linkDatabase   ")
-
+                    print("Usage: /linkDatabase <agent_id> <name> <path>")
+    
             elif command.startswith("/importAgents"):
-                    try:
-                        _, import_path = command.split()
-                        self.importAgentCores(import_path)
-                    except ValueError:
-                        print("Usage: /importAgents <path_to_agent_matrix.db>")
-                    except Exception as e:
-                        print(f"⚠️ Error importing agents: {e}")
+                try:
+                    _, import_path = command.split()
+                    self.importAgentCores(import_path)
+                except ValueError:
+                    print("Usage: /importAgents <path_to_agent_matrix.db>")
+                except Exception as e:
+                    print(f"⚠️ Error importing agents: {e}")
             
+            elif command.startswith("/swarmFarm"):
+                try:
+                    _, config_file = command.split()
+                    self.swarmAgentFarm(config_file)
+                except ValueError:
+                    print("Usage: /swarmFarm <config_file>")
+                except Exception as e:
+                    print(f"⚠️ Error initializing SwarmAgentFarm: {e}")
+                
             elif command == "/exit":
                 break
             
             else:
                 print("Invalid command. Type '/help' for options.")
-
+    
     def chat_with_agent(self, agent_id: str):
         """Interactive chat session with a specified agent."""
         #TODO add agentCores default conversation history db
@@ -729,16 +830,25 @@ class agentCores:
                 print(f"Agent '{agent_id}' not found.")
                 return
 
-            # Check if Ollama is available
-            try:
-                import ollama
-                OLLAMA_AVAILABLE = True
-            except ImportError:
-                print("Ollama package not installed. Please install with: pip install ollama")
-                return
-
             print(f"\nStarting chat with {agent_id}...")
             print("Type 'exit' to end the conversation.\n")
+        
+            # Get the agent's chat interface configuration
+            use_g4f = agent["agentCore"]["chat_interface"].get("use_g4f", False)
+            
+            if use_g4f:
+                if not G4F_AVAILABLE:
+                    print("g4f package not installed. Please install with: pip install g4f")
+                    return
+                chat_client = Chat()
+            else:
+                # Check if Ollama is available
+                try:
+                    import ollama
+                    OLLAMA_AVAILABLE = True
+                except ImportError:
+                    print("Ollama package not installed. Please install with: pip install ollama")
+                    return
 
             # Get the agent's configuration
             llm = agent["agentCore"]["models"]["large_language_model"]
@@ -752,7 +862,7 @@ class agentCores:
                 f"{agent['agentCore']['prompts']['agentPrompts']['llmSystemPrompt']} "
                 f"{agent['agentCore']['prompts']['agentPrompts']['llmBoosterPrompt']}"
             )
-
+        
             while True:
                 # Get user input
                 user_input = input("\nYou: ").strip()
@@ -760,20 +870,136 @@ class agentCores:
                     print("\nEnding chat session...")
                     break
 
-                # Stream the response
-                print("\nAssistant: ", end='', flush=True)
-                stream = ollama.chat(
-                    model=llm,
-                    messages=[
-                        {'role': 'system', 'content': system_prompt},
-                        {'role': 'user', 'content': user_input}
-                    ],
-                    stream=True,
-                )
+                try:
+                    if use_g4f:
+                        # Use g4f for chat
+                        response = chat_client.send(
+                            system_prompt + "\nUser: " + user_input + "\nAssistant:",
+                            stream=True
+                        )
+                        print("\nAssistant: ", end='', flush=True)
+                        for chunk in response:
+                            print(chunk, end='', flush=True)
+                        print()  # New line after response
+                    else:
+                        # Use Ollama for chat
+                        print("\nAssistant: ", end='', flush=True)
+                        stream = ollama.chat(
+                            model=llm,
+                            messages=[
+                                {'role': 'system', 'content': system_prompt},
+                                {'role': 'user', 'content': user_input}
+                            ],
+                            stream=True,
+                        )
 
-                for chunk in stream:
-                    print(chunk['message']['content'], end='', flush=True)
-                print()  # New line after response
+                        for chunk in stream:
+                            print(chunk['message']['content'], end='', flush=True)
+                        print()  # New line after response
+                except Exception as e:
+                    print(f"\n⚠️ Error during chat: {e}")
 
         except Exception as e:
             print(f"\n⚠️ Error in chat session: {e}")
+    
+    def swarmAgentFarm(self, config_file: str):
+        """
+        Initialize and manage a swarm of agents based on a configuration file.
+
+        Args:
+            config_file (str): Path to the JSON configuration file defining multiple agents.
+
+        Raises:
+            FileNotFoundError: If the configuration file does not exist.
+            json.JSONDecodeError: If the configuration file is not valid JSON.
+            Exception: For any other issues during initialization.
+        """
+        if not os.path.exists(config_file):
+            raise FileNotFoundError(f"Configuration file not found: {config_file}")
+        
+        with open(config_file, 'r') as f:
+            try:
+                config = json.load(f)
+            except json.JSONDecodeError:
+                raise json.JSONDecodeError("Invalid JSON in configuration file.")
+        
+        if not isinstance(config, list):
+            raise ValueError("Configuration file must contain a list of agent configurations.")
+        
+        print(f"Initializing SwarmAgentFarm with {len(config)} agents.")
+        
+        for agent_conf in config:
+            agent_id = agent_conf.get("agent_id")
+            if not agent_id:
+                print("Skipping agent without 'agent_id'.")
+                continue
+            try:
+                # Optionally handle template selection if needed
+                self.mintAgent(
+                    agent_id=agent_id,
+                    db_config=agent_conf.get("db_config"),
+                    model_config=agent_conf.get("model_config"),
+                    prompt_config=agent_conf.get("prompt_config"),
+                    command_flags=agent_conf.get("command_flags"),
+                    chat_interface=agent_conf.get("chat_interface")
+                )
+                print(f"Initialized agent: {agent_id}")
+            except Exception as e:
+                print(f"⚠️ Failed to initialize agent '{agent_id}': {e}")
+        
+        print("SwarmAgentFarm initialization complete.")
+    
+    def loadTemplates(self) -> Dict:
+        """Load agent templates from the shared templates database."""
+        # Placeholder for loading templates
+        # Implement template loading logic as needed
+        return {}
+    
+    def getNewAgentCore(self) -> Dict:
+        """Get a fresh agent core based on the base template."""
+        return json.loads(json.dumps(self.base_template))  # Deep copy
+    
+    # You can add more methods as needed...
+
+
+# Example Usage:
+if __name__ == "__main__":
+    # Initialize agentCores
+    agentCoresInstance = agentCores("test_agents.db")
+
+    # Example agent configuration
+    agent_config = {
+        "agentCore": {
+            "agent_id": "agent1",
+            "version": 1,
+            "uid": "unique_uid_1",
+            "save_state_date": "2024-12-11",
+            "models": {
+                "large_language_model": "gpt-4"
+            },
+            "prompts": {
+                "user_input_prompt": "Hello, how can I assist you today?"
+            },
+            "chat_interface": {
+                "use_g4f": False
+            }
+        }
+    }
+
+    # Upsert the agent configuration
+    agentCoresInstance.agent_library.upsert(
+        documents=[agent_config],
+        ids=["agent1"],
+        metadatas=[{
+            "save_date": "2024-12-11",
+            "uid": agent_config["agentCore"]["uid"],
+            "version": agent_config["agentCore"]["version"]
+        }]
+    )
+
+    # Retrieve the agent
+    agents = agentCoresInstance.agent_library.get(ids=["agent1"])
+    print(json.dumps(agents, indent=4))
+
+    # Delete the agent
+    agentCoresInstance.agent_library.delete(ids=["agent1"])
